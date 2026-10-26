@@ -52,7 +52,7 @@ cd <AstrBot 数据目录>/plugins
 git clone https://github.com/Kasa0724/astrbot_plugin_sl_status
 ```
 
-日志出现 `Plugin astrbot_plugin_sl_status (v2.1.0) by 小喷菇` 即加载成功。
+日志出现 `Plugin astrbot_plugin_sl_status (2.2.0) by 小喷菇` 即加载成功。
 
 ## 必要配置
 
@@ -88,6 +88,20 @@ AstrBot 面板 → 插件 → 运行状态卡 → 配置。
 | `show_plugins` | `true` | PLG：插件数 |
 | `show_protocol` | `true` | PROTO：协议端 |
 | `show_uptime` | `true` | UPTIME：运行时长 |
+
+### 字体与字号
+
+| 键 | 默认 | 说明 |
+|---|---|---|
+| `font_body` | 空 | 正文字体文件名（`assets/fonts/` 下）或绝对路径；留空用内置 Regular |
+| `font_medium` | 空 | 数值字体，比正文粗一档；留空用内置 Medium |
+| `font_bold` | 空 | 标签字体；留空用内置 Bold |
+| `font_title` | 空 | 标题字体；留空用系统 Noto Sans CJK |
+| `font_scale` | `1.0` | 全局字号缩放 0.7~1.6，行距同步缩放 |
+| `title_scale` | `1.0` | 标题额外缩放（在 `font_scale` 之上再乘） |
+
+想换字体：把 `.ttf` / `.ttc` 丢进 `assets/fonts/`，然后把对应键填成文件名即可。
+**注意**：内置圆体（M PLUS Rounded 1c）是日文字体，缺「菇」「喷」等简体字形，中文标题请继续用 Noto 或换成支持简体中文的字体。
 
 ### 协议端（一般不用填）
 
@@ -146,6 +160,7 @@ AstrBot 面板 → 插件 → 运行状态卡 → 配置。
 
 ## 更新日志
 
+- **v2.2.0**：标签颜色改回浅冰蓝；数值改用 Medium 字重（比正文略粗）；新增字体与字号配置（`font_body` / `font_medium` / `font_bold` / `font_title` / `font_scale` / `title_scale`）
 - **v2.1.0**：字段全部可开关、背景随机/固定、管理指令 `状态图`、默认标题通用化、输出文件名加随机串（并发不覆盖）
 - **v2.0.0**：多背景支持、`_conf_schema.json` 面板配置、显示开关
 - **v1.8.3**：标签改白色系，圆体 + 立体字效，全英文简写

@@ -12,7 +12,10 @@
   "bg_mode": {
     "type": "string",
     "description": "背景模式：random=每次随机（配合 #状态 换图），fixed=固定用 bg_fixed 指定的那张",
-    "options": ["random", "fixed"],
+    "options": [
+      "random",
+      "fixed"
+    ],
     "default": "random"
   },
   "bg_fixed": {
@@ -69,6 +72,36 @@
     "type": "bool",
     "description": "显示 UPTIME（运行时长）",
     "default": true
+  },
+  "font_body": {
+    "type": "string",
+    "description": "正文字体文件名（放在 assets/fonts/ 下，或填绝对路径）；留空用内置 M PLUS Rounded 1c Regular",
+    "default": ""
+  },
+  "font_medium": {
+    "type": "string",
+    "description": "中等字重字体（数值用，比 Regular 粗一档）；留空用内置 Medium",
+    "default": ""
+  },
+  "font_bold": {
+    "type": "string",
+    "description": "加粗字体（标签用）；留空用内置 Bold",
+    "default": ""
+  },
+  "font_title": {
+    "type": "string",
+    "description": "标题字体；留空用系统 Noto Sans CJK（内置圆体缺部分简体字形，别直接用圆体做标题）",
+    "default": ""
+  },
+  "font_scale": {
+    "type": "float",
+    "description": "全局字号缩放：1.0 为默认，0.7~1.6，行距会一起缩放",
+    "default": 1.0
+  },
+  "title_scale": {
+    "type": "float",
+    "description": "标题单独缩放（在 font_scale 之上再乘）",
+    "default": 1.0
   },
   "api_base": {
     "type": "string",

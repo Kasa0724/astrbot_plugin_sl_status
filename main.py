@@ -58,7 +58,7 @@ BG = (10, 21, 36)
 ACCENT = (127, 212, 255)
 WARN = (255, 204, 128)
 DANGER = (255, 138, 128)
-LABEL = (244, 249, 255)
+LABEL = (176, 222, 246)
 VALUE = (223, 236, 250)
 TRACK = (32, 52, 78)
 
@@ -157,7 +157,7 @@ def _cpu_model() -> str:
     "发送 #状态（别名 sl / 运行状态 / st）获取运行状态卡：插画背景 + 磨砂面板，CPU / RAM / DISK 进度条，"
     "含 CPU 型号、今日 token 消耗、会话上下文规模、运行时长、插件数、协议端版本。"
     "纯本地 Pillow 渲染，失败回退纯文本；协议端自动探测 SnowLuma / NapCat 等 OneBot v11 实现。",
-    "2.1.0",
+    "2.2.0",
 )
 class SlStatus(Star):
     def __init__(self, context: Context, config: AstrBotConfig | None = None):
@@ -396,16 +396,36 @@ class SlStatus(Star):
         top = (art.height - H) // 2
         return art.crop((left, top, left + W, top + H))
 
+    def _font_path(self, key: str, default_name: str):
+        """配置里指定的字体文件名（相对 assets/fonts 或绝对路径），找不到就用默认。"""
+        name = str(self._cfg(key, "") or "").strip()
+        cands = []
+        if name:
+            p = name if os.path.isabs(name) else os.path.join(self.plugin_root, "assets", "fonts", name)
+            cands.append(p)
+        cands.append(os.path.join(self.plugin_root, "assets", "fonts", default_name))
+        return _pick([c for c in cands if c])
+
     def _render(self, d: dict):
         if Image is None:
             return None
-        f_reg = _pick([os.path.join(self.plugin_root, "assets", "fonts", n) for n in
-                       ("MPLUSRounded1c-Regular.ttf", "MPLUSRounded1c-Medium.ttf")] + FONT_REGULAR)
+        f_reg = self._font_path("font_body", "MPLUSRounded1c-Regular.ttf") or _pick(FONT_REGULAR)
         if not f_reg:
             return None
-        f_bold = _pick([os.path.join(self.plugin_root, "assets", "fonts", n) for n in
-                        ("MPLUSRounded1c-Bold.ttf", "MPLUSRounded1c-ExtraBold.ttf")] +
-                       FONT_BOLD) or f_reg
+        f_med = self._font_path("font_medium", "MPLUSRounded1c-Medium.ttf") or f_reg
+        f_bold = (self._font_path("font_bold", "MPLUSRounded1c-Bold.ttf") or _pick(FONT_BOLD) or f_reg)
+        # 字号缩放 & 标题字体
+        try:
+            fs = max(0.7, min(1.6, float(self._cfg("font_scale", 1.0))))
+        except Exception:  # noqa: BLE001
+            fs = 1.0
+        try:
+            ts = max(0.7, min(1.6, float(self._cfg("title_scale", 1.0))))
+        except Exception:  # noqa: BLE001
+            ts = 1.0
+
+        def _sz(base: float) -> int:
+            return max(9, int(round(base * fs)))
         try:
             bg_path = self._bg_choice()
             img = self._fit_bg(bg_path).convert("RGBA") if bg_path else Image.new("RGBA", (W, H), BG + (255,))
@@ -424,13 +444,14 @@ class SlStatus(Star):
             dd.rounded_rectangle((px0, py0, px0 + 6, py1), radius=3, fill=ACCENT + (255,))
 
             # M PLUS Rounded 1c 是日文字体，缺部分简体字形（菇/喷），标题改回 Noto CJK 保证不出豆腐块
-            title_src = _pick(FONT_BOLD) or f_bold
-            title_f = ImageFont.truetype(title_src, 42, index=0)
-            sub_f = ImageFont.truetype(f_reg, 20, index=0)
-            bar_f = ImageFont.truetype(f_reg, 24, index=0)
-            bar_lbl = ImageFont.truetype(f_bold, 26, index=0)
-            k_f = ImageFont.truetype(f_bold, 19, index=0)
-            v_f = ImageFont.truetype(f_reg, 22, index=0)
+            # 标题默认用 Noto（圆体缺部分简体字形），可用 font_title 换成自制字体
+            title_src = self._font_path("font_title", "") or _pick(FONT_BOLD) or f_bold
+            title_f = ImageFont.truetype(title_src, max(10, int(round(42 * fs * ts))), index=0)
+            sub_f = ImageFont.truetype(f_reg, _sz(20), index=0)
+            bar_f = ImageFont.truetype(f_med, _sz(24), index=0)
+            bar_lbl = ImageFont.truetype(f_bold, _sz(26), index=0)
+            k_f = ImageFont.truetype(f_bold, _sz(19), index=0)
+            v_f = ImageFont.truetype(f_med, _sz(22), index=0)
 
             x0, x1 = px0 + 34, px1 - 34
 
@@ -440,7 +461,7 @@ class SlStatus(Star):
                  sub_f, (144, 168, 194, 255), (0, 1), 150)
 
             # 进度条
-            y = py0 + 140
+            y = py0 + int(140 * fs)
             show_bar = {"CPU": self._flag("show_cpu", True), "RAM": self._flag("show_ram", True),
                         "DISK": self._flag("show_disk", True)}
             for name, text, pct in d["bars"]:
@@ -450,14 +471,14 @@ class SlStatus(Star):
                 _txt(dd, (x0, y), name, bar_lbl, LABEL + (255,), (0, 2), 170)
                 vf = bar_f
                 if dd.textlength(text, font=vf) > (x1 - x0) - 150:
-                    vf = ImageFont.truetype(f_bold, 20, index=0)
+                    vf = ImageFont.truetype(f_med, _sz(20), index=0)
                 tw = dd.textlength(text, font=vf)
                 _txt(dd, (x1 - tw, y - 2), text, vf, VALUE + (255,), (0, 2), 170)
-                by = y + 36
-                dd.rounded_rectangle([x0, by, x1, by + 12], radius=6, fill=TRACK + (255,))
+                by = y + int(36 * fs)
+                dd.rounded_rectangle([x0, by, x1, by + int(12 * fs)], radius=6, fill=TRACK + (255,))
                 fw = max(10, int((x1 - x0) * pct / 100))
-                dd.rounded_rectangle([x0, by, x0 + fw, by + 12], radius=6, fill=_color_for(pct) + (255,))
-                y = by + 34
+                dd.rounded_rectangle([x0, by, x0 + fw, by + int(12 * fs)], radius=6, fill=_color_for(pct) + (255,))
+                y = by + int(34 * fs)
 
             # 信息区：显式分行，每行 1 或 2 组，行距固定，先保证不叠
             rows: list[list[tuple[str, str]]] = []
@@ -487,9 +508,9 @@ class SlStatus(Star):
             y += 26
 
             avail = (py1 - 24) - y
-            row_h = 44
+            row_h = int(44 * fs)
             if rows and row_h * len(rows) > avail:
-                row_h = max(34, int(avail / len(rows)))
+                row_h = max(int(32 * fs), int(avail / len(rows)))
             col_w = (x1 - x0) // 2
             for row in rows:
                 for i, (k, v) in enumerate(row):

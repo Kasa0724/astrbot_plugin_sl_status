@@ -26,6 +26,12 @@ help: |
   `show_cpu_model` / `show_model` / `show_plugins` / `show_protocol` / `show_uptime`（各字段显隐）、
   `api_base` / `access_token`（协议端地址与令牌，留空自动探测）。
 
+  ## 字体与字号
+  正文三档字重全部可换：`font_body`（正文）、`font_medium`（数值，比正文粗一档）、`font_bold`（标签）；
+  标题单独用 `font_title`（留空为系统 Noto Sans CJK，内置圆体缺部分简体字形，不建议用圆体做标题）。
+  以上均填 `assets/fonts/` 下的文件名或绝对路径，留空用内置字体。
+  `font_scale` 全局缩放（0.7~1.6，行距同步缩放），`title_scale` 只缩放标题。
+
   ## 管理命令
   `状态图`（别名 `slbg`，管理员）列出 `assets/bg/` 里的背景图与当前背景模式。
 
@@ -39,7 +45,7 @@ help: |
 
   ## 许可证
   MIT。内置圆体 M PLUS Rounded 1c 为 SIL OFL 1.1（见 FONT-NOTICE.md）。
-version: 2.1.0
+version: 2.2.0
 author: 小喷菇
 repo: https://github.com/Kasa0724/astrbot_plugin_sl_status
 astrbot_version: ">=4.0.0"
