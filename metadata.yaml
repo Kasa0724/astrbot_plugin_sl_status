@@ -1,9 +1,53 @@
 name: astrbot_plugin_sl_status
 display_name: 运行状态卡
-desc: 发送 #状态（别名 sl / 运行状态 / st）获取小喷菇的运行状态卡：整幅插画背景 + 磨砂信息面板，CPU / RAM / DISK 三条百分比进度条，另含 CPU 型号与线程数、今日 token 消耗、当前会话上下文规模、运行时长、插件数、协议端版本。纯本地 Pillow 渲染（不依赖 t2i 或浏览器），尺寸 1000×712，渲染失败自动回退为纯文本；通信端自动探测 SnowLuma / NapCat 等 OneBot v11 实现，换协议端无需改代码。只读本机指标与 AstrBot 自身数据库统计，不显示任何账号信息。
-version: v2.0.0
+short_desc: 一条指令生成整幅插画背景的系统状态卡：CPU/RAM/DISK 进度条、token 消耗、上下文、协议端版本，支持随机换图与字段开关
+desc: 发送 状态（别名 sl / st / 运行状态）生成整幅插画背景的系统状态卡：CPU / RAM / DISK 三条百分比进度条，另含 CPU 型号与线程数、今日 token 消耗、当前会话上下文、对话模型、插件数、协议端版本与运行时长。字段可在面板逐项开关，背景可在 assets/bg/ 放多张随机切换；纯本地 Pillow 渲染，失败自动回退纯文本，协议端自动适配 SnowLuma / NapCat 等 OneBot v11 实现。
+help: |
+  ## 功能
+  发送 `状态`（别名 `sl` / `st` / `运行状态`）生成一张状态卡图片：整幅插画背景 + 磨砂信息面板，
+  含 CPU / RAM / DISK 三条百分比进度条，以及 CPU 型号与线程数、今日 token 消耗、当前会话上下文、
+  对话模型、插件数、协议端版本、运行时长。所有字段可在面板分别开关。
+
+  ## 兼容性
+  - AstrBot >= 4.0.0，Python 3.10+（AstrBot 镜像已内置 Pillow / psutil）
+  - 平台：`aiocqhttp`（OneBot v11）。协议端自动探测 SnowLuma / NapCat / 其它 OneBot v11 实现
+  - 渲染为纯本地 Pillow，不依赖 t2i、playwright 或外部渲染服务；渲染失败自动回退纯文本
+
+  ## 安装
+  把插件目录放进 `<AstrBot 数据目录>/plugins/astrbot_plugin_sl_status/`，重启 AstrBot 即可。
+  也可以用 `git clone` 直接克隆到插件目录。
+
+  ## 必要配置
+  无。装上就能用：默认随机背景、全字段显示、协议端自动探测。
+
+  ## 主要配置
+  `title`（标题）、`bg_mode`（random 每次随机 / fixed 固定）、`bg_fixed`（固定用哪张）、
+  `send_image`（关掉只发文字）、`show_cpu` / `show_ram` / `show_disk` / `show_tokens` / `show_context` /
+  `show_cpu_model` / `show_model` / `show_plugins` / `show_protocol` / `show_uptime`（各字段显隐）、
+  `api_base` / `access_token`（协议端地址与令牌，留空自动探测）。
+
+  ## 管理命令
+  `状态图`（别名 `slbg`，管理员）列出 `assets/bg/` 里的背景图与当前背景模式。
+
+  ## 工作方式
+  读取容器 cgroup 的 CPU/内存计数与 `psutil` 的磁盘用量；token 与上下文取自 AstrBot 自身数据库（只读）；
+  协议端信息通过 OneBot `get_version_info` / `get_status` 获取。数据用 Pillow 逐层绘制：
+  背景 cover 裁剪 → 面板区高斯模糊压深 → 进度条 → 文字（暗影 + 正文两层），输出 PNG 发送。
+
+  ## 隐私
+  卡片只显示数值与版本号，不显示 QQ 号、昵称、群号、好友列表、文件路径、主机名；所有指标本地读取，不向外发送。
+
+  ## 许可证
+  MIT。内置圆体 M PLUS Rounded 1c 为 SIL OFL 1.1（见 FONT-NOTICE.md）。
+version: 2.1.0
 author: 小喷菇
 repo: ""
 astrbot_version: ">=4.0.0"
 support_platforms:
   - aiocqhttp
+tags:
+  - 状态卡
+  - 系统监控
+  - 图片渲染
+  - Pillow
+  - 可视化

@@ -1,165 +1,153 @@
-# 运行状态卡 · 使用说明书（astrbot_plugin_sl_status v2.0.0）
+<div align="center">
 
-一条 `#状态`，回一张整幅插画的状态卡：CPU / RAM / DISK 进度条、今日 token 消耗、会话上下文、CPU 型号、模型、插件数、协议端版本，全部叠在磨砂面板上。纯本地 Pillow 渲染，不依赖 t2i 或浏览器。
+# 运行状态卡
 
-- 作者：小喷菇
-- 版本：v2.0.0
-- 适配：AstrBot >= 4.0，平台 `aiocqhttp`（OneBot v11）
-- 协议端：SnowLuma / NapCat / 其它 OneBot v11 实现，自动探测
+**一条 `状态` 指令，回一张整幅插画背景的系统状态卡。**
 
----
+CPU / RAM / DISK 进度条、token 消耗、会话上下文、CPU 型号、模型、协议端版本，全叠在磨砂面板上。纯本地 Pillow 渲染，不依赖浏览器或渲染服务。
 
-## 一、安装
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![AstrBot](https://img.shields.io/badge/AstrBot-%E2%89%A54.0.0-green)](https://github.com/AstrBotDevs/AstrBot)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/)
+[![Platform](https://img.shields.io/badge/Platform-OneBot%20v11-lightgrey)](#兼容性)
 
-把整个插件目录放进 AstrBot 的插件目录后重启 AstrBot：
+</div>
+
+![预览](assets/preview.png)
+
+## 功能
+
+- **资源进度条**：CPU / RAM / DISK 三条，填充长度即百分比，颜色分级 `<60%` 冰蓝、`60~85%` 橙、`>85%` 红
+- **token 与经济性**：今日 in / out token 与调用次数（读 AstrBot 自身数据库，只读）
+- **会话上下文**：当前会话消息条数与 token 规模，方便判断上下文压得够不够
+- **硬件与运行时**：CPU 型号 + 线程数、AstrBot 版本与架构、运行时长、插件数、对话模型、协议端名称与版本
+- **随机背景**：`assets/bg/` 里放几张图，每次指令随机挑一张；也可固定某一张
+- **字段全可开关**：不想要的指标在面板里关掉，对应行自动消失，不会留空
+- **自动降级**：字体缺失 / 绘图异常 / 发图失败 → 自动回退纯文本，不会没反应
+
+## 兼容性
+
+| 项目 | 说明 |
+|---|---|
+| AstrBot | >= 4.0.0 |
+| Python | 3.10+（AstrBot 官方镜像已带 Pillow / psutil） |
+| 平台 | `aiocqhttp`（OneBot v11） |
+| 协议端 | SnowLuma / NapCat / 其它 OneBot v11 实现，自动探测地址与令牌 |
+| 渲染 | 纯本地 Pillow，无需 t2i / playwright / 外部服务 |
+
+## 安装
+
+**方式一：手动**
+
+把整个目录放到 AstrBot 的插件目录后重启：
 
 ```
 <AstrBot 数据目录>/plugins/astrbot_plugin_sl_status/
-├── main.py
-├── metadata.yaml
-├── _conf_schema.json      # 面板配置项定义
-├── README.md
-└── assets/
-    ├── bg/                # 背景图放这里（可多张）
-    ├── fonts/             # 圆体，随插件走
-    └── preview.png        # 预览图，不参与渲染
 ```
 
-日志出现 `Plugin astrbot_plugin_sl_status (v2.0.0) by 小喷菇` 即加载成功。
-
-从仓库安装：
+**方式二：git clone**
 
 ```bash
 cd <AstrBot 数据目录>/plugins
-git clone <仓库地址> astrbot_plugin_sl_status
+git clone <本仓库地址> astrbot_plugin_sl_status
 ```
 
----
+日志出现 `Plugin astrbot_plugin_sl_status (v2.1.0) by 小喷菇` 即加载成功。
 
-## 二、命令
+## 必要配置
 
-| 命令 | 别名 | 权限 | 说明 |
-|---|---|---|---|
-| `状态` | `sl`、`st`、`运行状态` | 所有人 | 输出状态卡（图片，失败自动回退文字） |
+**无。** 装上即可用：默认随机背景、全部字段显示、协议端自动探测。
 
-群里要带唤醒前缀 `#` 或 `/`，也可以 @ 机器人；私聊直接发 `状态`。
+## 主要配置
 
----
-
-## 三、面板配置项
-
-AstrBot 管理面板 → 插件 → 运行状态卡 → 配置，共 16 项：
+AstrBot 面板 → 插件 → 运行状态卡 → 配置。
 
 ### 输出
 
 | 键 | 类型 | 默认 | 说明 |
 |---|---|---|---|
 | `send_image` | bool | `true` | 关掉只发纯文本 |
-| `title` | string | `小喷菇 运行状态` | 卡片标题 |
+| `title` | string | `运行状态卡` | 卡片标题 |
 
 ### 背景
 
-| 键 | 类型 | 默认 | 说明 |
+| 键 | 可选值 | 默认 | 说明 |
 |---|---|---|---|
-| `bg_mode` | `random` / `fixed` | `random` | `random`：每次 `#状态` 随机换一张；`fixed`：固定用 `bg_fixed` 那张 |
-| `bg_fixed` | string | 空 | 固定模式下用的文件名（留空 = 用目录里第一张） |
+| `bg_mode` | `random` / `fixed` | `random` | 随机换图 / 固定一张 |
+| `bg_fixed` | 文件名 | 空 | 固定模式下用哪张；留空用目录第一张 |
 
-### 显示 / 隐藏（都可单独开关）
+### 字段显隐
 
-| 键 | 默认 | 控制内容 |
+| 键 | 默认 | 控制 |
 |---|---|---|
-| `show_cpu` | `true` | CPU 进度条 |
-| `show_ram` | `true` | RAM 进度条 |
-| `show_disk` | `true` | DISK 进度条 |
-| `show_tokens` | `true` | TOK：今日 token 消耗 |
-| `show_context` | `true` | CTX：当前会话上下文 |
-| `show_cpu_model` | `true` | CPU 型号与线程数 |
-| `show_model` | `true` | MODEL：当前对话模型 |
+| `show_cpu` / `show_ram` / `show_disk` | `true` | 三条进度条 |
+| `show_tokens` | `true` | TOK：今日 token |
+| `show_context` | `true` | CTX：会话上下文 |
+| `show_cpu_model` | `true` | CPU 型号 + 线程 |
+| `show_model` | `true` | MODEL：对话模型 |
 | `show_plugins` | `true` | PLG：插件数 |
-| `show_protocol` | `true` | PROTO：协议端名称与版本 |
+| `show_protocol` | `true` | PROTO：协议端 |
 | `show_uptime` | `true` | UPTIME：运行时长 |
 
-关掉某项后，那一行不占位置，下面的行自动上移，行距仍按固定 44px 排。
-
-### 协议端（一般不用动）
+### 协议端（一般不用填）
 
 | 键 | 默认 | 说明 |
 |---|---|---|
-| `api_base` | 空 | 手动指定 OneBot HTTP 地址；留空自动探测 |
-| `access_token` | 空 | 手动指定 token；一般用环境变量传 |
+| `api_base` | 空 | OneBot HTTP 地址，留空自动探测 |
+| `access_token` | 空 | 访问令牌，一般用环境变量传 |
 
----
+## 管理与指令
 
-## 四、换图 / 随机换图
+| 指令 | 别名 | 权限 | 说明 |
+|---|---|---|---|
+| `状态` | `sl`、`st`、`运行状态` | 所有人 | 生成状态卡 |
+| `状态图` | `slbg` | 管理员 | 列出可用背景图与当前背景模式 |
 
-1. 把图片放进插件目录的 `assets/bg/`，支持 `.png` / `.jpg` / `.jpeg` / `.webp`，可以放任意多张
-2. `bg_mode` 保持 `random`（默认）：每次发 `#状态` 随机挑一张
-3. 想固定某张：`bg_mode` 改 `fixed`，`bg_fixed` 填文件名（例如 `01_mushroom_night.png`）
+群里需带唤醒前缀（`#` 或 `/`）或 @ 机器人；私聊直接发。
 
-图片建议：
+## 工作方式
 
-- 横图，比例接近 1000:712（如 1216×832），代码按 cover 等比裁剪居中，不会变形
-- 主体偏右下、左侧留暗部，因为信息面板压在左侧
-- 命名随便，按文件名排序显示在配置提示里
+1. **采集**：CPU 读 cgroup `cpu.stat` 的 `usage_usec` 差值（容器里 `psutil.cpu_percent` 首次恒为 0）；内存读 cgroup `memory.current` / `memory.max`（容器 `/proc/meminfo` 是被裁剪的）；磁盘用 `psutil.disk_usage("/")`
+2. **统计**：token 与上下文从 AstrBot 数据库 `provider_stats` / `conversations` 聚合，`mode=ro` 只读打开
+3. **探测协议端**：`get_version_info` + `get_status`，按环境变量 → 配置 → 常见容器地址顺序尝试，401 直接跳下一个，成功地址会被缓存
+4. **绘制**：背景 cover 裁剪 → 面板区高斯模糊后压深 → 三条进度条 → 文字（暗影 + 正文两层），1000×712 PNG
+5. **发送**：`event.image_result()`；任何一步失败都回退纯文本
 
-没有 `assets/bg/` 或目录为空时，退回用旧版的 `assets/bg.png`，删升级不会白屏。
+排版：信息区显式分行、行距固定 44px，内容多时先缩字号再压行距（下限 34px），不会两行贴在一起；标签白色加粗、数值白色常规，靠字重分主次。
 
----
+## 换背景
 
-## 五、卡片内容
+1. 把图片放进 `assets/bg/`，支持 `.png` / `.jpg` / `.jpeg` / `.webp`，可放任意多张
+2. `bg_mode = random`（默认）：每次指令随机一张
+3. `bg_mode = fixed` + `bg_fixed = 文件名`：固定某一张
 
-- 标题区：`标题` + `AstrBot 版本 · 架构 · 更新时间`
-- 三条进度条：`CPU` / `RAM` / `DISK`，百分比决定填充长度，颜色分级 `<60%` 冰蓝、`60~85%` 橙、`>85%` 红
-- 信息区：`TOK` / `CTX` / `CPU` / `MODEL` / `PLG` / `PROTO` / `UPTIME`
-- 版式：画布 1000×712；面板 `(44,44,656,668)`；信息区显式分行、行距 44px，内容过多先缩字号再压行距（下限 34px），不会两行贴在一起
-- 配色：标签 `#F4F9FF` 加粗、数值 `#DFECFA` 常规，靠字重分主次
-- 字体：正文 M PLUS Rounded 1c 圆体（随插件带）；标题 Noto Sans CJK（圆体缺「菇」「喷」简体字形会出豆腐块）
-- 字效：暗影 + 正文两层，标题额外加底部高光
+图片建议横图、比例接近 1000:712（如 1216×832）；主体偏右下、左侧留暗部，因为信息面板压在左边。代码按 cover 等比裁剪，不会变形。
 
-## 六、数据来源
+自带一张中性深蓝渐变默认图，删掉也不影响——没有可用图片时会退回纯色底。
 
-| 指标 | 来源 |
+## 排错
+
+| 现象 | 处理 |
 |---|---|
-| CPU | cgroup `cpu.stat` 的 `usage_usec` 差值 ÷ 时间 ÷ 核数 |
-| RAM | cgroup `memory.current` / `memory.max`（取不到退回系统内存） |
-| DISK | `psutil.disk_usage("/")` |
-| CPU 型号 | `cpuinfo` 的 `model name`，清理厂商后缀 |
-| TOK / CTX | AstrBot 自身数据库，`mode=ro` 只读打开 |
-| PROTO | 协议端 `get_version_info` / `get_status` |
+| `PROTO` 显示未连接 | 协议端容器是否在跑；连不上是网络，401 是令牌 |
+| 发文字不是图片 | 日志里看 `渲染状态卡失败` / `发送图片失败`，或 `send_image` 被关了 |
+| CPU 一直 0.0% | 容器空闲时 cgroup 差值接近 0，正常 |
+| 换图没生效 | 图在 `assets/bg/` 且后缀受支持；`fixed` 模式文件名要和 `bg_fixed` 完全一致 |
 
-网络累计流量没做：容器网卡计数器基本恒为 0（流量走宿主），显示只会误导。
+## 隐私
 
-## 七、协议端自适应
+卡片只显示数值与版本号：不含 QQ 号、昵称、群号、好友列表、文件路径、主机名。所有指标本地读取，不外发；数据库只读打开，只做聚合。
 
-按顺序探测，首个可用的缓存：
+## 许可证
 
-1. 环境变量 `SNOWLUMA_API` / `NAPCAT_API` / `ONEBOT_API`
-2. 配置 `api_base`
-3. `http://snowluma:3000` → `http://napcat:3000` → `http://host.docker.internal:3000` → `http://127.0.0.1:3000`
+- 本插件：**MIT**，见 [LICENSE](LICENSE)
+- 内置圆体 **M PLUS Rounded 1c**：SIL OFL 1.1，见 [FONT-NOTICE.md](FONT-NOTICE.md)
+- 标题字体 Noto Sans CJK 由 AstrBot 运行环境自带，本仓库不分发
 
-token 取 `SNOWLUMA_TOKEN` / `NAPCAT_TOKEN` / `ONEBOT_TOKEN` / 配置 `access_token`；401 直接跳下一个地址。
+## 更新日志
 
----
-
-## 八、排错
-
-**`PROTO` 显示未连接**
-确认协议端容器在跑；连不上是网络问题，401 是 token 问题。
-
-**发出来是文字不是图片**
-看日志 `渲染状态卡失败` / `发送图片失败`，或 `send_image` 被关了。
-
-**CPU 一直 0.0%**
-容器空闲时 cgroup 差值接近 0，不是 bug。
-
-**换了图没生效**
-确认图在 `assets/bg/` 里、后缀是支持的格式；`fixed` 模式下文件名要和 `bg_fixed` 完全一致。
-
-**想少几行信息**
-面板里关掉对应的 `show_*`，不需要改代码。
-
-## 九、隐私
-
-- 卡片只显示数值与版本号，不显示 QQ 号、昵称、群号、好友列表、文件路径、主机名
-- 所有指标来自本机与 AstrBot 本地数据库，不向外发送
-- 数据库只读打开，只做聚合统计
+- **v2.1.0**：字段全部可开关、背景随机/固定、管理指令 `状态图`、默认标题通用化、输出文件名加随机串（并发不覆盖）
+- **v2.0.0**：多背景支持、`_conf_schema.json` 面板配置、显示开关
+- **v1.8.3**：标签改白色系，圆体 + 立体字效，全英文简写
+- **v1.7.0**：信息区显式分行，修复文字重叠
+- **v1.5.0**：整幅插画背景 + 叠字面板 + 进度条

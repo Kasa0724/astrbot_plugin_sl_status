@@ -3,3 +3,5 @@ __pycache__/
 *.log
 card_*.png
 .DS_Store
+assets/bg_local/
+*.zip

@@ -157,7 +157,7 @@ def _cpu_model() -> str:
     "发送 #状态（别名 sl / 运行状态 / st）获取运行状态卡：插画背景 + 磨砂面板，CPU / RAM / DISK 进度条，"
     "含 CPU 型号、今日 token 消耗、会话上下文规模、运行时长、插件数、协议端版本。"
     "纯本地 Pillow 渲染，失败回退纯文本；协议端自动探测 SnowLuma / NapCat 等 OneBot v11 实现。",
-    "2.0.0",
+    "2.1.0",
 )
 class SlStatus(Star):
     def __init__(self, context: Context, config: AstrBotConfig | None = None):
@@ -434,7 +434,7 @@ class SlStatus(Star):
 
             x0, x1 = px0 + 34, px1 - 34
 
-            _txt(dd, (x0, py0 + 28), str(self._cfg("title", "小喷菇 运行状态")), title_f, ACCENT + (255,), (0, 3), 200, True)
+            _txt(dd, (x0, py0 + 28), str(self._cfg("title", "运行状态卡")), title_f, ACCENT + (255,), (0, 3), 200, True)
             _txt(dd, (x0 + 2, py0 + 84),
                  f"AstrBot {d.get('ver')}  ·  {d.get('arch')}  ·  {d['stamp']}",
                  sub_f, (144, 168, 194, 255), (0, 1), 150)
@@ -507,6 +507,22 @@ class SlStatus(Star):
             return None
 
     # ---------------- 命令 ----------------
+    @filter.command("状态图", alias={"slbg"})
+    @filter.permission_type(filter.PermissionType.ADMIN)
+    async def cmd_bg(self, event: AstrMessageEvent):
+        """列出可用背景图与当前背景模式（管理员）"""
+        names = self._list_bgs()
+        mode = str(self._cfg("bg_mode", "random")).strip().lower()
+        fixed = str(self._cfg("bg_fixed", "")).strip()
+        lines = [f"背景模式：{mode}（fixed 时用 {fixed or '目录第一张'}）"]
+        if names:
+            lines.append(f"assets/bg/ 共 {len(names)} 张：")
+            lines += [f"· {n}" for n in names]
+            lines.append("换图：把图片丢进 assets/bg/；随机模式每次 #状态 自动换一张。")
+        else:
+            lines.append("assets/bg/ 里还没有图片，当前用 assets/bg.png 或纯色底。")
+        yield event.plain_result("\n".join(lines))
+
     @filter.command("状态", alias={"sl", "运行状态", "st"})
     async def cmd_status(self, event: AstrMessageEvent):
         """查看小喷菇运行状态（可视化状态卡，失败回退文字）"""
@@ -520,7 +536,7 @@ class SlStatus(Star):
                     return
                 except Exception as e:  # noqa: BLE001
                     logger.warning(f"sl_status: 发送图片失败，回退文本 {e}")
-        lines = [str(self._cfg("title", "小喷菇 运行状态")), f"AstrBot {d.get('ver')} · {d.get('arch')} · {d['stamp']}"]
+        lines = [str(self._cfg("title", "运行状态卡")), f"AstrBot {d.get('ver')} · {d.get('arch')} · {d['stamp']}"]
         for name, text, pct in d["bars"]:
             lines.append(f"· {name}: {text}")
         lines.append(f"TOK   in {_k(d.get('tok_in', 0))} · out {_k(d.get('tok_out', 0))} · "
