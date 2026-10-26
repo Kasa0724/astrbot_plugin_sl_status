@@ -1,0 +1,83 @@
+{
+  "send_image": {
+    "type": "bool",
+    "description": "发送图片状态卡（关闭后只发纯文本）",
+    "default": true
+  },
+  "title": {
+    "type": "string",
+    "description": "卡片标题文字",
+    "default": "小喷菇 运行状态"
+  },
+  "bg_mode": {
+    "type": "string",
+    "description": "背景模式：random=每次随机（配合 #状态 换图），fixed=固定用 bg_fixed 指定的那张",
+    "options": ["random", "fixed"],
+    "default": "random"
+  },
+  "bg_fixed": {
+    "type": "string",
+    "description": "固定模式下使用的图片文件名（放在插件 assets/bg/ 目录里；留空则用目录里第一张）",
+    "default": ""
+  },
+  "show_cpu": {
+    "type": "bool",
+    "description": "显示 CPU 进度条",
+    "default": true
+  },
+  "show_ram": {
+    "type": "bool",
+    "description": "显示 RAM 进度条",
+    "default": true
+  },
+  "show_disk": {
+    "type": "bool",
+    "description": "显示 DISK 进度条",
+    "default": true
+  },
+  "show_tokens": {
+    "type": "bool",
+    "description": "显示 TOK（今日 token 消耗）",
+    "default": true
+  },
+  "show_context": {
+    "type": "bool",
+    "description": "显示 CTX（当前会话上下文规模）",
+    "default": true
+  },
+  "show_cpu_model": {
+    "type": "bool",
+    "description": "显示 CPU 型号与线程数",
+    "default": true
+  },
+  "show_model": {
+    "type": "bool",
+    "description": "显示 MODEL（当前对话模型）",
+    "default": true
+  },
+  "show_plugins": {
+    "type": "bool",
+    "description": "显示 PLG（已装插件数）",
+    "default": true
+  },
+  "show_protocol": {
+    "type": "bool",
+    "description": "显示 PROTO（协议端名称与版本）",
+    "default": true
+  },
+  "show_uptime": {
+    "type": "bool",
+    "description": "显示 UPTIME（运行时长）",
+    "default": true
+  },
+  "api_base": {
+    "type": "string",
+    "description": "协议端 OneBot HTTP 地址（留空自动探测 SnowLuma / NapCat）",
+    "default": ""
+  },
+  "access_token": {
+    "type": "string",
+    "description": "协议端 access token（一般用环境变量传，留空即可）",
+    "default": ""
+  }
+}

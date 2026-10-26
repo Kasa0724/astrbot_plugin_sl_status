@@ -1,0 +1,9 @@
+name: astrbot_plugin_sl_status
+display_name: 运行状态卡
+desc: 发送 #状态（别名 sl / 运行状态 / st）获取小喷菇的运行状态卡：整幅插画背景 + 磨砂信息面板，CPU / RAM / DISK 三条百分比进度条，另含 CPU 型号与线程数、今日 token 消耗、当前会话上下文规模、运行时长、插件数、协议端版本。纯本地 Pillow 渲染（不依赖 t2i 或浏览器），尺寸 1000×712，渲染失败自动回退为纯文本；通信端自动探测 SnowLuma / NapCat 等 OneBot v11 实现，换协议端无需改代码。只读本机指标与 AstrBot 自身数据库统计，不显示任何账号信息。
+version: v2.0.0
+author: 小喷菇
+repo: ""
+astrbot_version: ">=4.0.0"
+support_platforms:
+  - aiocqhttp
