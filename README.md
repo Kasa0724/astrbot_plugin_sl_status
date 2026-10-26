@@ -49,7 +49,7 @@ CPU / RAM / DISK 进度条、token 消耗、会话上下文、CPU 型号、模�
 
 ```bash
 cd <AstrBot 数据目录>/plugins
-git clone <本仓库地址> astrbot_plugin_sl_status
+git clone https://github.com/Kasa0724/astrbot_plugin_sl_status
 ```
 
 日志出现 `Plugin astrbot_plugin_sl_status (v2.1.0) by 小喷菇` 即加载成功。

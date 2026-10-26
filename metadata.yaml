@@ -41,7 +41,7 @@ help: |
   MIT。内置圆体 M PLUS Rounded 1c 为 SIL OFL 1.1（见 FONT-NOTICE.md）。
 version: 2.1.0
 author: 小喷菇
-repo: ""
+repo: https://github.com/Kasa0724/astrbot_plugin_sl_status
 astrbot_version: ">=4.0.0"
 support_platforms:
   - aiocqhttp
